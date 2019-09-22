@@ -1,0 +1,36 @@
+version: "3"
+services:
+  products_api:
+    build: .
+    container_name: products_api
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:3000"
+    depends_on:
+      - db_products
+      - elasticsearch_products
+      - redis_products
+  db_products:
+    container_name: postgres_products
+    image: postgres
+  kibana_products:
+    image: docker.elastic.co/kibana/kibana:6.5.4
+    container_name: kibana_products
+    ports:
+      - 5601:5601
+    links:
+      - elasticsearch_products:elasticsearch_products
+  elasticsearch_products:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.4
+    container_name: elasticsearch_products
+    ports:
+      - 9200:9200
+  redis_products:
+    container_name: redis_products
+    image: redis:4.0.10-alpine
+    ports:
+      - 6379:6379
